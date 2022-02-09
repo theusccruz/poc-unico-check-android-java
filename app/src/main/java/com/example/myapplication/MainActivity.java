@@ -19,6 +19,8 @@ import com.acesso.acessobio_android.services.dto.ResultCamera;
 
 public class MainActivity extends AppCompatActivity implements AcessoBioListener {
     private IAcessoBioBuilder acessoBioBuilder;
+    private UnicoCheckCameraOpener.Selfie selfie;
+    private iAcessoBioSelfie cameraListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,15 +28,17 @@ public class MainActivity extends AppCompatActivity implements AcessoBioListener
         setContentView(R.layout.activity_main);
 
         this.acessoBioBuilder = new AcessoBio(this, this);
+
+        prepare();
     }
 
-    public void openCamera(View view) {
+    public void prepare() {
         UnicoCheckCamera unicoCheckCamera = this.acessoBioBuilder
                 .setAutoCapture(false)
                 .setSmartFrame(false)
                 .build();
 
-        iAcessoBioSelfie cameraListener = new iAcessoBioSelfie() {
+        cameraListener = new iAcessoBioSelfie() {
             @Override
             public void onSuccessSelfie(ResultCamera result) {
                 Log.d("Response", result.getEncrypted()); // getEncrypted() retorna o JWT
@@ -48,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements AcessoBioListener
         unicoCheckCamera.prepareSelfieCamera("unico-check-mobile-services.json", new SelfieCameraListener() {
             @Override
             public void onCameraReady(UnicoCheckCameraOpener.Selfie cameraOpener) {
-                cameraOpener.open(cameraListener);
+                selfie = cameraOpener;
             }
 
             @Override
@@ -56,6 +60,10 @@ public class MainActivity extends AppCompatActivity implements AcessoBioListener
                 System.out.println(message);
             }
         });
+    }
+
+    public void openCamera(View view){
+        selfie.open(cameraListener);
     }
 
     @Override
